@@ -13,12 +13,12 @@ my $config = {
 	name	=> 'main',
 
 	stats	=> {
-		enable	=> 1,
-		name	=> 'stats',
-		every	=> 60,
-		every_callback	=> {
-			session		=> 'main',
-			event		=> 'ev_got_stats',
+		enable	                => 1,
+		name	                => 'stats',
+		every	                => 60*5,
+		every_callback	        => {
+			session		        => 'main',
+			event		        => 'ev_got_stats',
 		},
 	},
 	serial	=> {
@@ -26,28 +26,33 @@ my $config = {
 		name	                => 'serial',
 		# port	                => '/dev/ttyUSB0',
 		port	                => '/dev/serial_wde',
-        baud                    => 9600,
-        restart_on_error_delay  => 60,
+        baudrate                => 9600,
+        datatype                => 'raw',
+        databits                => 8,
+        parity                  => 'none',
+        stopbits                => 1,
+        handshake               => 'none',
+        restart_on_error_delay  => 20,
 		input_callback	        => {
 			session		        => 'main',
 			event		        => 'ev_got_input',
 		},
 	},
     mqtt    => {
-		enable	=> 1,
-		name	=> 'mqtt',
-        broker  => '192.168.2.2',
-        topic   => '/custom/sensor1',
-		retain	=> 1,
+		enable	                => 1,
+		name	                => 'mqtt',
+        broker                  => '192.168.2.2',
+        topic                   => '/custom/sensor1',
+		retain	                => 1,
     },
     file    => {
-		enable	=> 0,
-		name	=> 'file',
-        path	=> './data/serial_input.txt',
-        # path	=> '-',
-		input_callback	=> {
-			session		=> 'main',
-			event		=> 'ev_got_input',
+		enable	                => 0,
+		name	                => 'file',
+        path	                => './data/serial_input.txt',
+        # path	                => '-',
+		input_callback	        => {
+			session		        => 'main',
+			event		        => 'ev_got_input',
 		},
     },
 };
@@ -271,7 +276,7 @@ sub ev_start {
 
 sub start_serial {
     my ($self) = @_;
-    $self->verbose(sprintf('[start_serial] port:%s', $self->{port}));
+    $self->verbose(sprintf('[start_serial] %s', (join ' ', map { "$_:".($self->{$_} // '') } qw(port baudrate datatype databits parity stopbits handshake))));
 	# Open a serial port, and tie it to a file handle for POE.
 	my $handle = Symbol::gensym();
 	$self->{port_handle} = tie(*$handle, "Device::SerialPort", $self->{port});
@@ -279,11 +284,11 @@ sub start_serial {
 	$self->{port_handle}->datatype('raw');
 	# minicom -D /dev/ttyUSB0 -b 115200
 	# socat /dev/ttyUSB0,B9600 STDOUT
-	$self->{port_handle}->baudrate($self->{baud});
-	$self->{port_handle}->databits(8);
-	$self->{port_handle}->parity("none");
-	$self->{port_handle}->stopbits(1);
-	# $self->{port_handle}->handshake("rts");
+	$self->{port_handle}->baudrate($self->{baudrate});
+	defined $self->{databits} &&  $self->{port_handle}->databits($self->{databits});
+	defined $self->{parity}   &&  $self->{port_handle}->parity($self->{parity});
+	defined $self->{stopbits} &&  $self->{port_handle}->stopbits($self->{stopbits});
+	defined $self->{handshake} && $self->{port_handle}->handshake($self->{handshake});
 	$self->{port_handle}->write_settings();
 
 	# Start interacting with the GPS.
@@ -477,7 +482,6 @@ sub new {
                 _start      	=> 'ev_start',
 				_default		=> 'ev_default',
 				_child			=> 'ev_child',
-				# ev_got_timer	=> 'ev_got_timer',
 				ev_do_output	=> 'ev_do_output',
             }
         ],
@@ -493,8 +497,6 @@ sub ev_start {
 	$self->{last_error_at} = undef;
 	$self->{mqtt} = Net::MQTT::Simple->new($self->{broker});
     $self->debug(sprintf('[ev_start] broker:%s', $self->{broker}));
-	# $kernel->delay('ev_got_timer', $self->{every});
-	$kernel->yield('ev_got_timer');
 }
 
 sub ev_do_output {

@@ -22,14 +22,15 @@ my $config = {
 		},
 	},
 	serial	=> {
-		enable	=> 1,
-		name	=> 'serial',
-		# port	=> '/dev/ttyUSB0',
-		port	=> '/dev/serial_wde',
-        baud    => 9600,
-		input_callback	=> {
-			session		=> 'main',
-			event		=> 'ev_got_input',
+		enable	                => 1,
+		name	                => 'serial',
+		# port	                => '/dev/ttyUSB0',
+		port	                => '/dev/serial_wde',
+        baud                    => 9600,
+        restart_on_error_delay  => 60,
+		input_callback	        => {
+			session		        => 'main',
+			event		        => 'ev_got_input',
 		},
 	},
     mqtt    => {
@@ -249,6 +250,7 @@ sub new {
 				_child				=> 'ev_child',
 				ev_got_input		=> 'ev_got_input',
 				ev_got_error 		=> 'ev_got_error',
+                ev_start_serial     => 'ev_start_serial',
             }
         ],
     );
@@ -263,6 +265,13 @@ sub ev_start {
 
 	$self->{last_input_at} = undef;
 	$self->{last_error_at} = undef;
+
+    $self->start_serial();
+}
+
+sub start_serial {
+    my ($self) = @_;
+    $self->verbose(sprintf('[start_serial] port:%s', $self->{port}));
 	# Open a serial port, and tie it to a file handle for POE.
 	my $handle = Symbol::gensym();
 	$self->{port_handle} = tie(*$handle, "Device::SerialPort", $self->{port});
@@ -289,6 +298,18 @@ sub ev_start {
 	);
 }
 
+sub ev_start_serial {
+    my ($self, $kernel) = @_[OBJECT, KERNEL];
+    $self->start_serial();
+}
+
+sub stop_serial {
+    my ($self) = @_;
+    $self->verbose(sprintf('[stop_serial] port:%s', $self->{port}));
+	delete $self->{port_wheel};
+	delete $self->{port_handle};
+}
+
 sub ev_got_input {
     my ($self, $kernel, $heap, $line) = @_[OBJECT, KERNEL, HEAP, ARG0];
 	chomp $line;
@@ -300,9 +321,10 @@ sub ev_got_input {
 sub ev_got_error {
     my ($self, $kernel, $heap, $operation, $errnum, $errstr, $id) = @_[OBJECT, KERNEL, HEAP, ARG0 .. ARG3];
 	$self->{last_error_at} = time;
-    $self->debug(sprintf('[ev_got_error] port:%s operation:%s errnum:%s errstr:%s id:%s', $self->{port}, $operation, $errnum, $errstr, $id));
-	delete $self->{port_wheel};
-	delete $self->{port_handle};
+    $self->debug(sprintf('[ev_got_error] port:%s operation:%s errnum:%s errstr:%s id:%s trying to restart in:%s', $self->{port}, $operation, $errnum, $errstr, $id, $self->{restart_on_error_delay}));
+
+    $self->stop_serial();
+    $kernel->delay('ev_start_serial', $self->{restart_on_error_delay}); 
 }
 
 

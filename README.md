@@ -3,7 +3,7 @@
 Serial to MQTT message router 
 
 This script was originally written to include an ancient temperature / humidity receiver into [home assistant](https://www.home-assistant.io/).
-The receiver is a "ELV USB-WDE1 Wetterdatenempfänger", which gets its readings via a 868MHz link and reports it to a serial port.
+The receiver is a ["ELV USB-WDE1 Wetterdatenempfänger"](https://de.elv.com/elv-usb-wetterdaten-empfaenger-usb-wde1-092030), which gets its readings via a 868MHz link and reports it to a serial port.
 This scripts listens on a serial port, parses the USB-WDE1 reading and reports them via MQTT to a broker.
 
 ## Usage
@@ -11,6 +11,63 @@ This scripts listens on a serial port, parses the USB-WDE1 reading and reports t
 * `git clone` this repository to a directory of your choice and edit the configuration file `conf/serial2mqtt.json`
 * start the script with `bin/serial2mqtt.pl -c conf/serial2mqtt.json -D`
 
+## Configuration
+
+logging settings, where to log, what to log:
+>   "log_file"   : "./data/serial2mqtt.log",
+>   "debug"      : 1,
+>   "verbose"    : 1,
+POE internal unique name, do not change
+>   "name"       : "main",
+daemonization options
+>   "pid_file"   : "./data/serial2mqtt.pid",
+
+statistics module
+>   "stats"         : {
+en-/disable statistics
+>       "enable"    : 1,
+emit statistics every this seconds
+>       "every"     : 300,
+POE internal unique name / callbacks, do not change
+>        "name"      : "stats",
+>        "every_callback" : {
+>            "event"      : "ev_got_stats",
+>            "session"    : "main"
+>        }
+>   },
+   "serial" : {
+      "enable" : 1,
+      "name" : "serial",
+      "port" : "/dev/serial_wde",
+      "datatype" : "raw",
+      "baudrate" : 9600,
+      "databits" : 8,
+      "parity" : "none",
+      "handshake" : "none",
+      "restart_on_error_delay" : 20,
+      "stopbits" : 1
+      "input_callback" : {
+         "session" : "main",
+         "event" : "ev_got_input"
+      }
+   },
+   "mqtt" : {
+      "enable" : 1,
+      "retain" : 1,
+      "name" : "mqtt",
+      "broker" : "192.168.2.2",
+      "topic" : "/custom/sensor1"
+   },
+   "file" : {
+      "enable" : 0,
+      "path" : "./data/serial_input.txt",
+      "name" : "file",
+      "input_callback" : {
+         "event" : "ev_got_input",
+         "session" : "main"
+      }
+   }
+}
 
 ## udev rule for a fixed device name
 

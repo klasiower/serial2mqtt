@@ -13,66 +13,81 @@ This scripts listens on a serial port, parses the USB-WDE1 reading and reports t
 
 ## Configuration
 
-*main module*<br>
-`{`<br>
-logging settings: where to log, what to log:<br>
-`   "log_file"   : "./data/serial2mqtt.log",`<br>
-`   "debug"      : 1,`<br>
-`   "verbose"    : 1,`<br>
-POE internal unique name, do not change<br>
-`   "name"       : "main",`<br>
-daemonization options<br>
-`   "pid_file"   : "./data/serial2mqtt.pid",`<br>
-<br>
-*statistics module*<br>
-`   "stats"         : {`<br>
-en-/disable statistics<br>
-`       "enable"    : 1,`<br>
-emit statistics every this seconds<br>
-`       "every"     : 300,`<br>
-POE internal unique name / callbacks, do not change<br>
-`        "name"      : "stats",`<br>
-`        "every_callback" : {`<br>
-`            "event"      : "ev_got_stats",`<br>
-`            "session"    : "main"`<br>
-`        }`<br>
-`   },`<br>
-*serial module*<br>
-`   "serial" : {`<br>
-`      "enable" : 1,`<br>
-`      "name" : "serial",`<br>
-`      "port" : "/dev/serial_wde",`<br>
-`      "datatype" : "raw",`<br>
-`      "baudrate" : 9600,`<br>
-`      "databits" : 8,`<br>
-`      "parity" : "none",`<br>
-`      "handshake" : "none",`<br>
-`      "restart_on_error_delay" : 20,`<br>
-`      "stopbits" : 1`<br>
-`      "input_callback" : {`<br>
-`         "session" : "main",`<br>
-`         "event" : "ev_got_input"`<br>
-`      }`<br>
-`   },`<br>
-*mqtt module*<br>
-`   "mqtt" : {`<br>
-`      "enable" : 1,`<br>
-`      "retain" : 1,`<br>
-`      "name" : "mqtt",`<br>
-`      "broker" : "192.168.2.2",`<br>
-`      "topic" : "/custom/sensor1"`<br>
-`   },`<br>
-*file module (used for debugging)*<br>
-`   "file" : {`<br>
-`      "enable" : 0,`<br>
-`      "path" : "./data/serial_input.txt",`<br>
-`      "name" : "file",`<br>
-`      "input_callback" : {`<br>
-`         "event" : "ev_got_input",`<br>
-`         "session" : "main"`<br>
-`      }`<br>
-`   }`<br>
-`}`<br>
+```json
+# *main module*
+{
+    # logging settings: where to log, what to log:
+    "log_file"   : "./data/serial2mqtt.log",
+    "debug"      : 1,
+    "verbose"    : 1,
+    # POE internal unique name, do not change
+    "name"       : "main",
+    # daemonization options
+    "pid_file"   : "./data/serial2mqtt.pid",
+
+    # *statistics output module*:
+    "stats"         : {
+        # en-/disable module
+        "enable"    : 1,
+        # emit statistics every this seconds
+        "every"     : 300,
+        # POE internal unique name / callbacks, do not change
+        "name"      : "stats",
+        "every_callback" : {
+            "event"      : "ev_got_stats",
+            "session"    : "main"
+        }
+    },
+
+    # *serial input module:*
+    "serial" : {
+        # en-/disable module
+        "enable" : 1,
+        # serial port name, see below how to configure a static name
+        "port" : "/dev/serial_wde",
+        # serial port params: 9600 8N1
+        "baudrate" : 9600,
+        "databits" : 8,
+        "parity" : "none",
+        "stopbits" : 1
+        "datatype" : "raw",
+        "handshake" : "none",
+        # watchdog, restarts on error after this number of seconds
+        "restart_on_error_delay" : 20,
+        # POE internal unique name / callbacks, do not change
+        "name" : "serial",
+        "input_callback" : {
+            "session" : "main",
+            "event" : "ev_got_input"
+        }
+    },
+    # *mqtt output module:*
+    "mqtt" : {
+        # en-/disable module
+        "enable" : 1,
+        # IP / hostname of broker
+        "broker" : "192.168.2.2",
+        # topic to publish readings
+        "topic" : "/custom/sensor1"
+        # retain mqtt messages
+        "retain" : 1,
+        # POE internal unique name / callbacks, do not change
+        "name" : "mqtt",
+    },
+    # *file* input module:
+    # used for debugging
+    "file" : {
+        # en-/disable module
+        "enable" : 0,
+        "path" : "./data/serial_input.txt",
+        # POE internal unique name / callbacks, do not change
+        "name" : "file",
+        "input_callback" : {
+            "event" : "ev_got_input",
+            "session" : "main"
+        }
+    }
+}
 
 ## udev rule for a fixed device name
 

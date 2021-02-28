@@ -23,6 +23,7 @@ This scripts listens on a serial port, parses the USB-WDE1 reading and reports t
     # POE internal unique name, do not change
     "name"       : "main",
     # daemonization options
+    "daemonize"  : 1,
     "pid_file"   : "./data/serial2mqtt.pid",
 
     # *statistics output module*:
@@ -88,6 +89,7 @@ This scripts listens on a serial port, parses the USB-WDE1 reading and reports t
         }
     }
 }
+```
 
 ## udev rule for a fixed device name
 

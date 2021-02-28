@@ -9,14 +9,15 @@ use POE;
 use FindBin;
 use Proc::Daemon;
 my $root = "$FindBin::Bin/../";
-
-use lib "$root/extlib";
+use lib "$FindBin::Bin/../extlib";
 
 my $config = {
     debug       => 1,
 	verbose	    => 1,
 	name	    => 'main',
-    log_file    => './data/serial2mqtt.log',
+    daemonize   => 0,
+    # log_file    => './data/serial2mqtt.log',
+    log_file    => '-',
     log_fh      => undef,
     config_file => './conf/serial2mqtt.yaml',
 	# Proc::Daemon
@@ -77,28 +78,55 @@ my $config = {
     },
 };
 
+use Getopt::Long;
+my $args;
+Getopt::Long::GetOptions(
+    'config-file|c=s'   => \$args->{config_file},
+    'log-file|l=s'      => \$args->{log_file},
+    'daemonize|D'       => \$args->{daemonize}
+);
+# merge default config with config file from command line (if given)
+if ($args->{config_file}) {
+    use JSON;
+    my $j = JSON->new();
+    eval {
+        local *F;
+        open F, '<', $args->{config_file} or die "can't read config file:$args->{config_file} ($!)";
+        # slurp and decode json config
+        local $/ = undef;
+        $config = $j->decode(<F>);
+    }; if ($@) { die($@) }
+}
+
+# merge config with arguments from command line (if given)
+if ($args->{log_file})  { $config->{log_file}  = $args->{log_file}  }
+if ($args->{daemonize}) { $config->{daemonize} = $args->{daemonize} }
+
 # use JSON; my $j = JSON->new();
 # print $j->pretty->encode($config);
 # exit 0;
 
 $config->{log_fh} = open_log($config->{log_file});
 
-my $daemon = Proc::Daemon->new(
-    work_dir     => $config->{work_dir},
-    # child_STDOUT => '/path/to/daemon/output.file',
-    child_STDOUT => sprintf('+>>%s', $config->{log_file}),
-    child_STDERR => sprintf('+>>%s', $config->{log_file}),
-    pid_file     => $config->{pid_file},
-    # exec_command => 'perl /home/my_script.pl',
-    # XXX open serial port in parent process?
-	dont_close_fh => [ $config->{log_fh} ],
-);
+if ($config->{daemonize}) {
+    my $daemon = Proc::Daemon->new(
+        work_dir     => $config->{work_dir},
+        # child_STDOUT => '/path/to/daemon/output.file',
+        child_STDOUT => sprintf('+>>%s', $config->{log_file}),
+        child_STDERR => sprintf('+>>%s', $config->{log_file}),
+        pid_file     => $config->{pid_file},
+        # exec_command => 'perl /home/my_script.pl',
+        # XXX open serial port in parent process?
+        dont_close_fh => [ $config->{log_fh} ],
+    );
 
-my $pid = $daemon->Init();
-my $child_pid = $pid;
-if ($pid){ print STDERR "child started with pid:$pid\n";  exit 0 };
+    my $pid = $daemon->Init();
+    my $child_pid = $pid;
+    if ($pid){ print STDERR "child started with pid:$pid\n";  exit 0 };
 
-main::verbose(sprintf('log_file:%s pid_file:%s pid:%s', $config->{log_file}, $config->{pid_file}, $child_pid));
+    # child
+    main::verbose(sprintf('log_file:%s pid_file:%s pid:%s', $config->{log_file}, $config->{pid_file}, $child_pid));
+}
 
 my $wde = wde::main->new( $config );
 POE::Kernel->run();

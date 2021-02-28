@@ -13,66 +13,66 @@ This scripts listens on a serial port, parses the USB-WDE1 reading and reports t
 
 ## Configuration
 
-*main module*
-`{`
-logging settings: where to log, what to log:
-`   "log_file"   : "./data/serial2mqtt.log",`
-`   "debug"      : 1,`
-`   "verbose"    : 1,`
-POE internal unique name, do not change
-`   "name"       : "main",`
-daemonization options
-`   "pid_file"   : "./data/serial2mqtt.pid",`
-
-*statistics module*
-`   "stats"         : {`
-en-/disable statistics
-`       "enable"    : 1,`
-emit statistics every this seconds
-`       "every"     : 300,`
-POE internal unique name / callbacks, do not change
-`        "name"      : "stats",`
-`        "every_callback" : {`
-`            "event"      : "ev_got_stats",`
-`            "session"    : "main"`
-`        }`
-`   },`
-*serial module*
-`   "serial" : {`
-`      "enable" : 1,`
-`      "name" : "serial",`
-`      "port" : "/dev/serial_wde",`
-`      "datatype" : "raw",`
-`      "baudrate" : 9600,`
-`      "databits" : 8,`
-`      "parity" : "none",`
-`      "handshake" : "none",`
-`      "restart_on_error_delay" : 20,`
-`      "stopbits" : 1`
-`      "input_callback" : {`
-`         "session" : "main",`
-`         "event" : "ev_got_input"`
-`      }`
-`   },`
-*mqtt module*
-`   "mqtt" : {`
-`      "enable" : 1,`
-`      "retain" : 1,`
-`      "name" : "mqtt",`
-`      "broker" : "192.168.2.2",`
-`      "topic" : "/custom/sensor1"`
-`   },`
-*file module (used for debugging)*
-`   "file" : {`
-`      "enable" : 0,`
-`      "path" : "./data/serial_input.txt",`
-`      "name" : "file",`
-`      "input_callback" : {`
-`         "event" : "ev_got_input",`
-`         "session" : "main"`
-`      }`
-`   }`
-`}`
+*main module*<br>
+`{`<br>
+logging settings: where to log, what to log:<br>
+`   "log_file"   : "./data/serial2mqtt.log",`<br>
+`   "debug"      : 1,`<br>
+`   "verbose"    : 1,`<br>
+POE internal unique name, do not change<br>
+`   "name"       : "main",`<br>
+daemonization options<br>
+`   "pid_file"   : "./data/serial2mqtt.pid",`<br>
+<br>
+*statistics module*<br>
+`   "stats"         : {`<br>
+en-/disable statistics<br>
+`       "enable"    : 1,`<br>
+emit statistics every this seconds<br>
+`       "every"     : 300,`<br>
+POE internal unique name / callbacks, do not change<br>
+`        "name"      : "stats",`<br>
+`        "every_callback" : {`<br>
+`            "event"      : "ev_got_stats",`<br>
+`            "session"    : "main"`<br>
+`        }`<br>
+`   },`<br>
+*serial module*<br>
+`   "serial" : {`<br>
+`      "enable" : 1,`<br>
+`      "name" : "serial",`<br>
+`      "port" : "/dev/serial_wde",`<br>
+`      "datatype" : "raw",`<br>
+`      "baudrate" : 9600,`<br>
+`      "databits" : 8,`<br>
+`      "parity" : "none",`<br>
+`      "handshake" : "none",`<br>
+`      "restart_on_error_delay" : 20,`<br>
+`      "stopbits" : 1`<br>
+`      "input_callback" : {`<br>
+`         "session" : "main",`<br>
+`         "event" : "ev_got_input"`<br>
+`      }`<br>
+`   },`<br>
+*mqtt module*<br>
+`   "mqtt" : {`<br>
+`      "enable" : 1,`<br>
+`      "retain" : 1,`<br>
+`      "name" : "mqtt",`<br>
+`      "broker" : "192.168.2.2",`<br>
+`      "topic" : "/custom/sensor1"`<br>
+`   },`<br>
+*file module (used for debugging)*<br>
+`   "file" : {`<br>
+`      "enable" : 0,`<br>
+`      "path" : "./data/serial_input.txt",`<br>
+`      "name" : "file",`<br>
+`      "input_callback" : {`<br>
+`         "event" : "ev_got_input",`<br>
+`         "session" : "main"`<br>
+`      }`<br>
+`   }`<br>
+`}`<br>
 
 ## udev rule for a fixed device name
 

@@ -170,9 +170,12 @@ if ($config->{daemonize}) {
         main::verbose(sprintf('running as user:%s uid:%s', $config->{setuid}, $>));
     }
     if (defined $config->{setgid}) {
-        my $gid = getpwnam($config->{setgid}) or die ("can't get gid from setgid:$config->{setgid} ($!)");
+        my @gids;
+        for (split /( |,)/, $config->{setgid}) {
+            push @gids, getpwnam($_) or die ("can't get gid from setgid:$_ ($config->{setgid}) ($!)");
+        }
         # (
-        $) = "$gid";
+        $) = join ' ', @gids;
         main::verbose(sprintf('running as group:%s gid:%s', $config->{setgid}, "$)"));
     }
 }

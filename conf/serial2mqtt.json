@@ -5,7 +5,7 @@
    "log_file" : "data/serial2mqtt.log",
    "pid_file" : "data/serial2mqtt.pid",
    "setuid"   : "dst",
-   "setgid"   : "dst",
+   "setgid"   : "dst dialout",
    "stats" : {
       "enable" : 1,
       "every" : 300,

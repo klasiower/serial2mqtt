@@ -1,5 +1,16 @@
 # serial2mqtt
+
 Serial to MQTT message router 
+
+This script was originally written to include an ancient temperature / humidity receiver into [home assistant](https://www.home-assistant.io/).
+The receiver is a "ELV USB-WDE1 Wetterdatenempfänger", which gets its readings via a 868MHz link and reports it to a serial port.
+This scripts listens on a serial port, parses the USB-WDE1 reading and reports them via MQTT to a broker.
+
+## Usage
+
+* `git clone` this repository to a directory of your choice and edit the configuration file `conf/serial2mqtt.json`
+* start the script with `bin/serial2mqtt.pl -c conf/serial2mqtt.json -D`
+
 
 ## udev rule for a fixed device name
 

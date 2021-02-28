@@ -6,14 +6,14 @@ This script was originally written to include an ancient temperature / humidity 
 The receiver is a ["ELV USB-WDE1 Wetterdatenempfänger"](https://de.elv.com/elv-usb-wetterdaten-empfaenger-usb-wde1-092030), which gets its readings via a 868MHz link and reports it to a serial port.
 This scripts listens on a serial port, parses the USB-WDE1 reading and reports them via MQTT to a broker.
 
-## Usage
+## quick start
 
 * `git clone` this repository to a directory of your choice and edit the configuration file `conf/serial2mqtt.json`
 * start the script with `bin/serial2mqtt.pl -c conf/serial2mqtt.json -D`
 
 ## Configuration
 
-```json
+```
 # *main module*
 {
     # logging settings: where to log, what to log:

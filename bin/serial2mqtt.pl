@@ -372,7 +372,7 @@ sub ev_start {
 	$self->{last_input_at} = undef;
 	$self->{last_error_at} = undef;
 
-    $self->start_serial();
+    $kernel->yield('ev_start_serial');
 }
 
 sub start_serial {

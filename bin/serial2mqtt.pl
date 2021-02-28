@@ -163,6 +163,18 @@ if ($config->{daemonize}) {
     # child
     $poe_kernel->has_forked;
     main::verbose(sprintf('log_file:%s pid_file:%s pid:%s', $config->{log_file}, $config->{pid_file}, $$));
+} else {
+    if (defined $config->{setuid}) {
+        my $uid = getpwnam($config->{setuid}) or die ("can't get uid from setuid:$config->{setuid} ($!)");
+        $> = $uid;
+        main::verbose(sprintf('running as user:%s uid:%s', $config->{setuid}, $uid));
+    }
+    if (defined $config->{setgid}) {
+        my $gid = getpwnam($config->{setgid}) or die ("can't get gid from setgid:$config->{setgid} ($!)");
+        # (
+        $) = "$gid $gid";
+        main::verbose(sprintf('running as group:%s gid:%s', $config->{setgid}, "$gid $gid"));
+    }
 }
 
 my $wde = wde::main->new( $config );

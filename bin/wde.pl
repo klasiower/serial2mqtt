@@ -6,11 +6,29 @@ sub POE::Kernel::ASSERT_DEFAULT () { 1 }
 sub POE::Kernel::ASSERT_EVENTS  () { 1 }
 sub POE::Kernel::ASSERT_FILES   () { 1 }
 use POE;
+use FindBin;
+use lib "$FindBin::Bin/../extlib";
+use Proc::Daemon;
 
+my $root = "$FindBin::Bin/../";
 my $config = {
-    debug   => 1,
-	verbose	=> 1,
-	name	=> 'main',
+    debug       => 1,
+	verbose	    => 1,
+	name	    => 'main',
+    log_file    => './data/serial2mqtt.log',
+    log_fh      => undef,
+	# Proc::Daemon
+    work_dir	=> $root,
+    # setuid  	=> 'dst', # Sets the real user identifier ($<) and the effective user identifier ($>) for the daemon process using
+    # setgid  	=> 'dst', Sets the real group identifier ($() and the effective group identifier ($)) for the daemon process using
+#     child_STDIN
+#     child_STDOUT
+#     child_STDERR
+#     dont_close_fh
+#     dont_close_fd
+    pid_file	=> './data/serial2mqtt.pid',
+    # file_umask
+    # exec_command
 
 	stats	=> {
 		enable	                => 1,
@@ -57,19 +75,53 @@ my $config = {
     },
 };
 
+
+$config->{log_fh} = open_log($config->{log_file});
+
+my $daemon = Proc::Daemon->new(
+    work_dir     => $config->{work_dir},
+    # child_STDOUT => '/path/to/daemon/output.file',
+    child_STDOUT => sprintf('+>>%s', $config->{log_file}),
+    child_STDERR => sprintf('+>>%s', $config->{log_file}),
+    pid_file     => $config->{pid_file},
+    # exec_command => 'perl /home/my_script.pl',
+	dont_close_fh => [ $config->{log_fh} ],
+);
+
+my $pid = $daemon->Init();
+if ($pid){ print STDERR "child started with pid:$pid\n";  exit 0 };
+
+main::verbose(sprintf('log_file:%s pid_file:%s pid:%s', $config->{log_file}, $config->{pid_file}, $pid));
+
 my $wde = wde::main->new( $config );
 POE::Kernel->run();
 exit 0;
 
+sub open_log {
+    my ($file) = @_;
+    if ($file eq '-') {
+        return *STDERR;
+    } else {
+        # local *F;
+        eval {
+            open F, '>', $file or do {
+                my $e = @_;  chomp $e;
+                die("Can't write to log_file:$file ($e)\n");
+            };
+            select F; $| = 1; # make unbuffered
+        };
+        return *F
+    }
+}
 
 sub debug {
     my $t = scalar localtime;
-    $config->{debug} && print STDERR "[DBG][$t] @_\n";
+    $config->{debug} && $config->{log_fh}->print("[DBG][$t] @_\n");
 }
 
 sub verbose {
     my $t = scalar localtime;
-    $config->{verbose} && print STDERR "[VER][$t] @_\n";
+    $config->{verbose} && $config->{log_fh}->print("[VER][$t] @_\n");
 }
 
 exit 0;

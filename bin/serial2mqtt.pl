@@ -406,7 +406,14 @@ sub start_serial {
 
 sub ev_start_serial {
     my ($self, $kernel) = @_[OBJECT, KERNEL];
-    $self->start_serial();
+    eval {
+        $self->start_serial();
+    }; if ($@) {
+        my $e = $@;  chomp $e;
+        $self->debug(sprintf('error starting serial port:%s (%s), retrying in:%s', $self->{port}, $e, $self->{restart_on_error_delay}));
+        $self->stop_serial();
+        $kernel->delay('ev_start_serial', $self->{restart_on_error_delay}); 
+    }
 }
 
 sub stop_serial {

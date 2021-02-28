@@ -9,6 +9,7 @@ This scripts listens on a serial port, parses the USB-WDE1 reading and reports t
 ## quick start
 
 * `git clone` this repository to a directory of your choice and edit the configuration file `conf/serial2mqtt.json`
+* install prerequisites: `apt install libpoe-perl libproc-daemon-perl libjson-perl libdevice-serialport-perl`
 * start the script with `bin/serial2mqtt.pl -D -l data/serial2mqtt.log`
 
 ## command line parameters

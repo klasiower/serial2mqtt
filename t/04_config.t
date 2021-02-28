@@ -7,16 +7,18 @@ sub POE::Kernel::ASSERT_EVENTS  () { 1 }
 sub POE::Kernel::ASSERT_FILES   () { 1 }
 use POE;
 use FindBin;
-use lib "$FindBin::Bin/../extlib";
 use Proc::Daemon;
-
 my $root = "$FindBin::Bin/../";
+
+use lib "$root/extlib";
+
 my $config = {
     debug       => 1,
 	verbose	    => 1,
 	name	    => 'main',
     log_file    => './data/serial2mqtt.log',
     log_fh      => undef,
+    config_file => './conf/serial2mqtt.yaml',
 	# Proc::Daemon
     work_dir	=> $root,
     # setuid  	=> 'dst', # Sets the real user identifier ($<) and the effective user identifier ($>) for the daemon process using
@@ -75,6 +77,9 @@ my $config = {
     },
 };
 
+# use JSON; my $j = JSON->new();
+# print $j->pretty->encode($config);
+# exit 0;
 
 $config->{log_fh} = open_log($config->{log_file});
 
@@ -85,13 +90,15 @@ my $daemon = Proc::Daemon->new(
     child_STDERR => sprintf('+>>%s', $config->{log_file}),
     pid_file     => $config->{pid_file},
     # exec_command => 'perl /home/my_script.pl',
+    # XXX open serial port in parent process?
 	dont_close_fh => [ $config->{log_fh} ],
 );
 
 my $pid = $daemon->Init();
+my $child_pid = $pid;
 if ($pid){ print STDERR "child started with pid:$pid\n";  exit 0 };
 
-main::verbose(sprintf('log_file:%s pid_file:%s pid:%s', $config->{log_file}, $config->{pid_file}, $pid));
+main::verbose(sprintf('log_file:%s pid_file:%s pid:%s', $config->{log_file}, $config->{pid_file}, $child_pid));
 
 my $wde = wde::main->new( $config );
 POE::Kernel->run();
@@ -145,7 +152,7 @@ sub ev_default {
 
 sub ev_child {
     my ($self, $kernel) = @_[OBJECT, KERNEL];
-    $self->verbose('[ev_child]');
+    # $self->verbose('[ev_child]');
 }
 
 sub debug {
@@ -568,4 +575,3 @@ sub j {
 	return $self->{json}->encode($data);
 }
 1;
-

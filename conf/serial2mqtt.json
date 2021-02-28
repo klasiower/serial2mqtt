@@ -1,0 +1,49 @@
+{
+   "verbose" : 1,
+   "debug" : 1,
+   "name" : "main",
+   "work_dir" : "/home/dst/scripts/TMP/serial2mqtt/bin/../",
+   "log_file" : "./data/serial2mqtt.log",
+   "pid_file" : "./data/serial2mqtt.pid",
+   "stats" : {
+      "enable" : 1,
+      "every" : 300,
+      "name" : "stats",
+      "every_callback" : {
+         "event" : "ev_got_stats",
+         "session" : "main"
+      }
+   },
+   "serial" : {
+      "enable" : 1,
+      "name" : "serial",
+      "port" : "/dev/serial_wde",
+      "datatype" : "raw",
+      "baudrate" : 9600,
+      "databits" : 8,
+      "parity" : "none",
+      "handshake" : "none",
+      "restart_on_error_delay" : 20,
+      "stopbits" : 1
+      "input_callback" : {
+         "session" : "main",
+         "event" : "ev_got_input"
+      }
+   },
+   "mqtt" : {
+      "enable" : 1,
+      "retain" : 1,
+      "name" : "mqtt",
+      "broker" : "192.168.2.2",
+      "topic" : "/custom/sensor1"
+   },
+   "file" : {
+      "enable" : 0,
+      "path" : "./data/serial_input.txt",
+      "name" : "file",
+      "input_callback" : {
+         "event" : "ev_got_input",
+         "session" : "main"
+      }
+   }
+}

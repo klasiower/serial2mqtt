@@ -22,6 +22,15 @@ usage: bin/serial2mqtt.pl
     -h, --help                  this help
 ```
 
+## boot persistance
+
+* edit, then copy the provided template `conf/serial2mqtt.service` to `/etc/systemd/system/`
+* reload systemd `systemctl daemon-reload`
+* start the new service `serial2mqtt.service` manually
+* check if everything went right: `systemctl status serial2mqtt.service`
+* if not, check the logs: `journalctl -u serial2mqtt.service`
+* add persistance on boot: `systemctl enable serial2mqtt.service` (not needed, already done)
+
 ## Configuration
 
 ```

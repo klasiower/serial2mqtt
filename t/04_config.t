@@ -83,8 +83,21 @@ my $args;
 Getopt::Long::GetOptions(
     'config-file|c=s'   => \$args->{config_file},
     'log-file|l=s'      => \$args->{log_file},
-    'daemonize|D'       => \$args->{daemonize}
+    'daemonize|D'       => \$args->{daemonize},
+    'help|h'            => \$args->{help}
 );
+
+if ($args->{help}) {
+    print STDERR << "EOT";
+usage: $0
+    -c, --config-file=file      config file to use (default: $config->{config_file})
+    -l, --log-file=file         log file           (default: $config->{log_file})
+    -D, --daemonize             run in background  (default: no)
+    -h, --help                  this help
+EOT
+    exit 0;
+}
+
 # merge default config with config file from command line (if given)
 if ($args->{config_file}) {
     use JSON;

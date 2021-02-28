@@ -9,7 +9,17 @@ This scripts listens on a serial port, parses the USB-WDE1 reading and reports t
 ## quick start
 
 * `git clone` this repository to a directory of your choice and edit the configuration file `conf/serial2mqtt.json`
-* start the script with `bin/serial2mqtt.pl -c conf/serial2mqtt.json -D`
+* start the script with `bin/serial2mqtt.pl -D -l data/serial2mqtt.log`
+
+## command line parameters
+
+```
+usage: bin/serial2mqtt.pl
+    -c, --config-file=file      config file to use (default: ./conf/serial2mqtt.yaml)
+    -l, --log-file=file         log file           (default: -)
+    -D, --daemonize             run in background  (default: no)
+    -h, --help                  this help
+```
 
 ## Configuration
 

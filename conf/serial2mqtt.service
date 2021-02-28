@@ -1,0 +1,12 @@
+[Unit]
+Description=Serial to MQTT router
+Documentation=serial2mqtt --help
+After=network.target
+
+[Service]
+ExecStart=/home/dst/scripts/serial2mqtt/bin/serial2mqtt.pl -c conf/serial2mqtt.json -D
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+Alias=serial2mqtt.service

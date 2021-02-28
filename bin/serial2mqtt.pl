@@ -102,6 +102,15 @@ EOT
 if ($args->{config_file}) {
     use JSON;
     my $j = JSON->new();
+    # qualify relative paths
+    for (qw(config_file)) {
+        if ((exists  $args->{$_}) and
+            (defined $args->{$_}) and
+            ($args->{$_} !~ m|^/|) and ($args->{$_} ne '-'))
+        {
+             $args->{$_} = sprintf('%s/%s', $root, $args->{$_});
+        }
+    }
     eval {
         local *F;
         open F, '<', $args->{config_file} or die "can't read config file:$args->{config_file} ($!)";

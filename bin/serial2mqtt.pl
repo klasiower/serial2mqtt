@@ -19,17 +19,17 @@ my $config = {
     # log_file    => './data/serial2mqtt.log',
     log_file    => '-',
     log_fh      => undef,
-    config_file => './conf/serial2mqtt.yaml',
+    config_file => 'conf/serial2mqtt.yaml',
 	# Proc::Daemon
     work_dir	=> $root,
-    # setuid  	=> 'dst', # Sets the real user identifier ($<) and the effective user identifier ($>) for the daemon process using
-    # setgid  	=> 'dst', Sets the real group identifier ($() and the effective group identifier ($)) for the daemon process using
+    setuid  	=> 'dst', # Sets the real user identifier ($<) and the effective user identifier ($>) for the daemon process using
+    setgid  	=> 'dst', # Sets the real group identifier ($() and the effective group identifier ($)) for the daemon process using
 #     child_STDIN
 #     child_STDOUT
 #     child_STDERR
 #     dont_close_fh
 #     dont_close_fd
-    pid_file	=> './data/serial2mqtt.pid',
+    pid_file	=> 'data/serial2mqtt.pid',
     # file_umask
     # exec_command
 
@@ -69,7 +69,7 @@ my $config = {
     file    => {
 		enable	                => 0,
 		name	                => 'file',
-        path	                => './data/serial_input.txt',
+        path	                => 'data/serial_input.txt',
         # path	                => '-',
 		input_callback	        => {
 			session		        => 'main',
@@ -115,6 +115,18 @@ if ($args->{config_file}) {
 if ($args->{log_file})  { $config->{log_file}  = $args->{log_file}  }
 if ($args->{daemonize}) { $config->{daemonize} = $args->{daemonize} }
 
+# qualify relative paths
+for (qw(log_file config_file pid_file)) {
+    if ((exists  $config->{$_}) and
+        (defined $config->{$_}) and
+        ($config->{$_} !~ m|^/|) and ($config->{$_} ne '-'))
+    {
+         $config->{$_} = sprintf('%s/%s', $root, $config->{$_});
+         # main::verbose(sprintf('normalized %s:%s', $_, $config->{$_}));
+         # print STDERR sprintf('normalized %s:%s'."\n", $_, $config->{$_});
+    }
+}
+
 # use JSON; my $j = JSON->new();
 # print $j->pretty->encode($config);
 # exit 0;
@@ -122,7 +134,7 @@ if ($args->{daemonize}) { $config->{daemonize} = $args->{daemonize} }
 $config->{log_fh} = open_log($config->{log_file});
 
 if ($config->{daemonize}) {
-    my $daemon = Proc::Daemon->new(
+    my $args = {
         work_dir     => $config->{work_dir},
         # child_STDOUT => '/path/to/daemon/output.file',
         child_STDOUT => sprintf('+>>%s', $config->{log_file}),
@@ -131,15 +143,17 @@ if ($config->{daemonize}) {
         # exec_command => 'perl /home/my_script.pl',
         # XXX open serial port in parent process?
         dont_close_fh => [ $config->{log_fh} ],
-    );
+    };
+    if (defined $config->{setuid}) { $args->{setuid} = $config->{setuid} };
+    if (defined $config->{setgid}) { $args->{setgid} = $config->{setgid} };
+    my $daemon = Proc::Daemon->new(%$args);
 
     my $pid = $daemon->Init();
-    my $child_pid = $pid;
     if ($pid){ print STDERR "child started with pid:$pid\n";  exit 0 };
 
     # child
     $poe_kernel->has_forked;
-    main::verbose(sprintf('log_file:%s pid_file:%s pid:%s', $config->{log_file}, $config->{pid_file}, $child_pid));
+    main::verbose(sprintf('log_file:%s pid_file:%s pid:%s', $config->{log_file}, $config->{pid_file}, $$));
 }
 
 my $wde = wde::main->new( $config );

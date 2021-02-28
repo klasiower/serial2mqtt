@@ -35,6 +35,10 @@ usage: bin/serial2mqtt.pl
     "name"       : "main",
     # daemonization options
     "daemonize"  : 1,
+    # user to run the daemon as
+    # on a debian system, the user needs to be part of the dialout group
+    "setuid"     : "my_user",
+    "setgid"     : "my_group",
     "pid_file"   : "./data/serial2mqtt.pid",
 
     # *statistics output module*:

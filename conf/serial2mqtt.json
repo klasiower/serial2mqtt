@@ -2,8 +2,10 @@
    "verbose" : 1,
    "debug" : 1,
    "name" : "main",
-   "log_file" : "./data/serial2mqtt.log",
-   "pid_file" : "./data/serial2mqtt.pid",
+   "log_file" : "data/serial2mqtt.log",
+   "pid_file" : "data/serial2mqtt.pid",
+   "setuid"   : "dst",
+   "setgid"   : "dst",
    "stats" : {
       "enable" : 1,
       "every" : 300,
@@ -38,7 +40,7 @@
    },
    "file" : {
       "enable" : 0,
-      "path" : "./data/serial_input.txt",
+      "path" : "data/serial_input.txt",
       "name" : "file",
       "input_callback" : {
          "event" : "ev_got_input",

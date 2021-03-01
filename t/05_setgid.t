@@ -164,20 +164,27 @@ if ($config->{daemonize}) {
     $poe_kernel->has_forked;
     main::verbose(sprintf('log_file:%s pid_file:%s pid:%s', $config->{log_file}, $config->{pid_file}, $$));
 } else {
+    main::verbose("Before: RUID=$<, EUID=$>, RGID=$(, EGID=$), umask=" .sprintf("%o",umask));
+    if (defined $config->{setgid}) {
+        my @gids;
+        main::verbose(sprintf('setting groups:(%s)', $config->{setgid}));
+        for (split /[ ,]/, $config->{setgid}) {
+            my ($_name, $_passwd, $_gid, $_members) = getgrnam $_
+                or die ("can't get gid from setgid:$_ ($config->{setgid}) ($!)");
+            main::verbose(sprintf('setting group:(%s) name:%s passwd:%s gid:%s members:%s', $_, $_name, $_passwd, $_gid, $_members));
+            push @gids, $_gid;
+        }
+        # (
+        $) = (join ' ', @gids);
+        main::verbose(sprintf('running as groups:(%s) gids in:(%s) gids out:(%s)', $config->{setgid}, (join ' ', @gids), "$)"));
+    }
     if (defined $config->{setuid}) {
-        my $uid = getpwnam($config->{setuid}) or die ("can't get uid from setuid:$config->{setuid} ($!)");
+        my $uid = getpwnam($config->{setuid})
+            or die ("can't get uid from setuid:$config->{setuid} ($!)");
         $> = $uid;
         main::verbose(sprintf('running as user:%s uid:%s', $config->{setuid}, $>));
     }
-    if (defined $config->{setgid}) {
-        my @gids;
-        for (split /( |,)/, $config->{setgid}) {
-            push @gids, getgrnam($_) or die ("can't get gid from setgid:$_ ($config->{setgid}) ($!)");
-        }
-        # (
-        $) = join ' ', @gids;
-        main::verbose(sprintf('running as group:%s gid:%s', $config->{setgid}, "$)"));
-    }
+    main::verbose("After: RUID=$<, EUID=$>, RGID=$(, EGID=$), umask=" .sprintf("%o",umask));
 }
 
 my $wde = wde::main->new( $config );

@@ -6,13 +6,19 @@ This script was originally written to include an ancient temperature / humidity 
 The receiver is a ["ELV USB-WDE1 Wetterdatenempfänger"](https://de.elv.com/elv-usb-wetterdaten-empfaenger-usb-wde1-092030), which gets its readings via a 868MHz link and reports it to a serial port.
 This scripts listens on a serial port, parses the USB-WDE1 reading and reports them via MQTT to a broker.
 
-## quick start
+The repository provides multiple ways to run the script:
+
+* manually
+* via systemd as a service
+* as a Docker container
+
+## quick start (manually)
 
 * `git clone` this repository to a directory of your choice and edit the configuration file `conf/serial2mqtt.json`
 * install prerequisites: `apt install libpoe-perl libproc-daemon-perl libjson-perl libdevice-serialport-perl`
 * start the script with `bin/serial2mqtt.pl -D -l data/serial2mqtt.log`
 
-## command line parameters
+### command line parameters
 
 ```
 usage: bin/serial2mqtt.pl
@@ -22,7 +28,14 @@ usage: bin/serial2mqtt.pl
     -h, --help                  this help
 ```
 
-## boot persistance
+## running as Docker container
+
+* build docker image: `bin/docker_build.sh`
+* run image: `docker_run.sh`
+
+to watch logs, run `docker exec -it serial2mqtt tail -F data/serial2mqtt.log`
+
+## boot persistance via systemd
 
 * edit, then copy the provided template `conf/serial2mqtt.service` to `/etc/systemd/system/`
 * reload systemd `systemctl daemon-reload`
@@ -31,7 +44,7 @@ usage: bin/serial2mqtt.pl
 * if not, check the logs: `journalctl -u serial2mqtt.service`
 * add persistance on boot: `systemctl enable serial2mqtt.service` (not needed, already done)
 
-## Configuration
+# Configuration
 
 ```
 # *main module*
@@ -114,6 +127,8 @@ usage: bin/serial2mqtt.pl
     }
 }
 ```
+
+# tips and tricks
 
 ## udev rule for a fixed device name
 

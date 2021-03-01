@@ -4,8 +4,8 @@
    "name" : "main",
    "log_file" : "data/serial2mqtt.log",
    "pid_file" : "data/serial2mqtt.pid",
-   "setuid"   : "dst",
-   "setgid"   : "dst dialout",
+   "setuid"   : "nobody",
+   "setgid"   : "nogroup dialout",
    "stats" : {
       "enable" : 1,
       "every" : 300,

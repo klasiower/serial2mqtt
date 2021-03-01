@@ -16,7 +16,7 @@ This scripts listens on a serial port, parses the USB-WDE1 reading and reports t
 
 ```
 usage: bin/serial2mqtt.pl
-    -c, --config-file=file      config file to use (default: ./conf/serial2mqtt.yaml)
+    -c, --config-file=file      config file to use (default: ./conf/serial2mqtt.json)
     -l, --log-file=file         log file           (default: -)
     -D, --daemonize             run in background  (default: no)
     -h, --help                  this help

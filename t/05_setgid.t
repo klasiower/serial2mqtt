@@ -19,11 +19,11 @@ my $config = {
     # log_file    => './data/serial2mqtt.log',
     log_file    => '-',
     log_fh      => undef,
-    config_file => 'conf/serial2mqtt.yaml',
+    # config_file => 'conf/serial2mqtt.yaml',
 	# Proc::Daemon
     work_dir	=> $root,
     setuid  	=> 'dst', # Sets the real user identifier ($<) and the effective user identifier ($>) for the daemon process using
-    setgid  	=> 'dst', # Sets the real group identifier ($() and the effective group identifier ($)) for the daemon process using
+    setgid  	=> 'dst dialout', # Sets the real group identifier ($() and the effective group identifier ($)) for the daemon process using
 #     child_STDIN
 #     child_STDOUT
 #     child_STDERR

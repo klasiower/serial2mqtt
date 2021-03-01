@@ -16,7 +16,7 @@ The repository provides multiple ways to run the script:
 
 * `git clone` this repository to a directory of your choice and edit the configuration file `conf/serial2mqtt.json`
 * install prerequisites: `apt install libpoe-perl libproc-daemon-perl libjson-perl libdevice-serialport-perl`
-* start the script with `bin/serial2mqtt.pl -D -l data/serial2mqtt.log`
+* start the script with `bin/serial2mqtt.pl -D -l data/serial2mqtt.log -c conf/serial2mqtt.json`
 
 ### command line parameters
 
@@ -31,7 +31,7 @@ usage: bin/serial2mqtt.pl
 ## running as Docker container
 
 * build docker image: `bin/docker_build.sh`
-* run image: `docker_run.sh`
+* run image: `bin/docker_run.sh`
 
 to watch logs, run `docker exec -it serial2mqtt tail -F data/serial2mqtt.log`
 

@@ -130,6 +130,10 @@ to watch logs, run `docker exec -it serial2mqtt tail -F data/serial2mqtt.log`
 
 # tips and tricks
 
+## integration of GMC-200E Plus Geiger counter
+
+`bin/serial2mqtt-geiger.pl` is configured to read and report Counts Per Minute / Second of a [GMC-200E Plus](https://www.gqelectronicsllc.com/GMC_300E_Plus_User_Guide.pdf) Geiger Counter
+
 ## udev rule for a fixed device name
 
 edit or create the file /etc/udev/rules.d/10-local.rules

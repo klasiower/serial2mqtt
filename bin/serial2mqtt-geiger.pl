@@ -551,7 +551,9 @@ sub ev_request {
 
 sub write_serial {
     my ($self, $line) = @_;
-    $self->{port_wheel}->put($line);
+    if (defined $self->{port_wheel}) {
+        $self->{port_wheel}->put($line);
+    }
 }
 
 1;
